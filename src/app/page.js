@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Page() {
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
-  const [stokPopup, setStokPopup] = useState(false);
   const [stokData, setStokData] = useState([]);
   const [loadingStok, setLoadingStok] = useState(false);
 
@@ -56,20 +55,20 @@ export default function Page() {
     try {
       const resultsAll = await Promise.all(requests);
       setResults(resultsAll);
-    } catch (err) {
+    } catch {
       setError("Terjadi kesalahan saat memproses request.");
     }
 
     setLoading(false);
   };
 
-  // 🔹 Ambil stok cepat via route
+  // ✅ Ambil stok dari API kamu sendiri (via route)
   const handleCekStok = async () => {
     setLoadingStok(true);
-    setStokPopup(true);
     try {
       const res = await fetch("/api/cek_stock");
       const json = await res.json();
+
       if (json.ok && Array.isArray(json.data)) {
         setStokData(json.data);
       } else {
@@ -80,15 +79,6 @@ export default function Page() {
     }
     setLoadingStok(false);
   };
-
-  // 🔹 Tutup popup bila klik di luar
-  useEffect(() => {
-    const closePopup = (e) => {
-      if (e.target.id === "stokModal") setStokPopup(false);
-    };
-    window.addEventListener("click", closePopup);
-    return () => window.removeEventListener("click", closePopup);
-  }, []);
 
   return (
     <div className="min-h-screen bg-neutral-100 flex flex-col items-center py-10">
@@ -112,7 +102,7 @@ export default function Page() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder={`Contoh:\nbeli BPAL1 087882724621\nbeli BPAL3 083184857772`}
-          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-black"
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p className="italic text-sm text-[#A0522D] mt-2">
           Contoh format: <span className="font-mono">beli BPAL1 0878xxxxxxx</span>
@@ -152,7 +142,34 @@ export default function Page() {
           </div>
         )}
 
-        {/* Hasil */}
+        {/* ✅ Daftar Stok */}
+        <div className="mt-6 border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">Stok Produk</h2>
+          {loadingStok ? (
+            <div className="text-blue-600 font-medium animate-pulse py-3 text-center">
+              Memuat stok...
+            </div>
+          ) : stokData.length > 0 ? (
+            <div className="max-h-[350px] overflow-y-auto font-mono text-sm text-gray-700 whitespace-pre-wrap">
+              {stokData.map((item, i) => (
+                <div
+                  key={i}
+                  className={`border-b py-1 ${
+                    item.sisa_slot === 0 ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {`${item.type} | ${item.nama} | ${item.sisa_slot} unit`}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 italic text-center">
+              Klik “Cek Stok” untuk melihat data stok terkini.
+            </p>
+          )}
+        </div>
+
+        {/* Results */}
         {results.length > 0 && (
           <div className="mt-6 overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-sm text-left text-gray-700">
@@ -186,6 +203,7 @@ export default function Page() {
           </div>
         )}
 
+        {/* Loading Info */}
         {loading && (
           <div className="text-center text-blue-600 font-medium mt-4 animate-pulse">
             Sedang memproses semua pembelian...
@@ -197,49 +215,6 @@ export default function Page() {
       <div className="text-sm text-gray-400 mt-10">
         © {new Date().getFullYear()} | Diistore API Panel
       </div>
-
-      {/* 🔹 Popup Stok */}
-      {stokPopup && (
-        <div
-          id="stokModal"
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"
-        >
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 relative">
-            <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h2 className="text-xl font-bold text-gray-800">Stok Produk</h2>
-              <button
-                onClick={() => setStokPopup(false)}
-                className="text-gray-400 hover:text-gray-600 text-lg"
-              >
-                ✕
-              </button>
-            </div>
-
-            {loadingStok ? (
-              <div className="text-center text-blue-600 font-medium animate-pulse py-10">
-                Memuat stok...
-              </div>
-            ) : stokData.length > 0 ? (
-              <div className="max-h-[70vh] overflow-y-auto font-mono text-sm text-gray-700 whitespace-pre-wrap">
-                {stokData.map((item, i) => (
-                  <div
-                    key={i}
-                    className={`border-b py-1 ${
-                      item.sisa_slot === 0 ? "text-red-600" : "text-green-600"
-                    }`}
-                  >
-                    {`${item.type} | ${item.nama} | ${item.sisa_slot} unit`}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-6">
-                Tidak ada data stok.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
