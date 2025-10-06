@@ -10,6 +10,7 @@ export default function Page() {
   const [stokData, setStokData] = useState([]);
   const [loadingStok, setLoadingStok] = useState(false);
 
+  // 🔹 Jalankan pembelian massal
   const handleRun = async () => {
     setError("");
     setResults([]);
@@ -63,7 +64,7 @@ export default function Page() {
     setLoading(false);
   };
 
-  // ✅ Ambil stok dari API JSON
+  // 🔹 Ambil stok dari API dan tampilkan di popup
   const handleCekStok = async () => {
     setLoadingStok(true);
     setStokPopup(true);
@@ -77,13 +78,14 @@ export default function Page() {
         setStokData([]);
       }
     } catch (err) {
+      console.error(err);
       setStokData([]);
     }
 
     setLoadingStok(false);
   };
 
-  // Tutup popup saat klik di luar modal
+  // 🔹 Tutup popup jika klik di luar modal
   useEffect(() => {
     const closePopup = (e) => {
       if (e.target.id === "stokModal") setStokPopup(false);
@@ -122,10 +124,11 @@ export default function Page() {
           <button
             onClick={handleCekStok}
             disabled={loadingStok}
-            className={`px-5 py-2.5 rounded-lg font-semibold text-white transition ${loadingStok
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
-              }`}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-white transition ${
+              loadingStok
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
           >
             {loadingStok ? "Memuat..." : "Cek Stok"}
           </button>
@@ -133,10 +136,11 @@ export default function Page() {
           <button
             onClick={handleRun}
             disabled={loading}
-            className={`px-6 py-2.5 rounded-lg font-semibold text-white transition ${loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            className={`px-6 py-2.5 rounded-lg font-semibold text-white transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
             {loading ? "Memproses..." : "Mulai Request"}
           </button>
@@ -149,7 +153,7 @@ export default function Page() {
           </div>
         )}
 
-        {/* Results */}
+        {/* Hasil Request */}
         {results.length > 0 && (
           <div className="mt-6 overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-sm text-left text-gray-700">
@@ -167,8 +171,9 @@ export default function Page() {
                     <td className="px-4 py-2 font-medium">{item.no}</td>
                     <td className="px-4 py-2">{item.produk}</td>
                     <td
-                      className={`px-4 py-2 font-semibold ${item.data?.status ? "text-green-600" : "text-red-600"
-                        }`}
+                      className={`px-4 py-2 font-semibold ${
+                        item.data?.status ? "text-green-600" : "text-red-600"
+                      }`}
                     >
                       {item.data?.status ? "Sukses" : "Gagal"}
                     </td>
@@ -195,7 +200,7 @@ export default function Page() {
         © {new Date().getFullYear()} | Diistore API Panel
       </div>
 
-      {/* ✅ Popup Stok */}
+      {/* 🔹 Popup Stok */}
       {stokPopup && (
         <div
           id="stokModal"
@@ -203,7 +208,7 @@ export default function Page() {
         >
           <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 animate-fadeIn">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h2 className="text-xl font-bold text-gray-800">Stok Produk</h2>
+              <h2 className="text-xl font-bold text-gray-800">📦 Stok Produk</h2>
               <button
                 onClick={() => setStokPopup(false)}
                 className="text-gray-400 hover:text-gray-600 text-lg"
@@ -217,14 +222,13 @@ export default function Page() {
                 Memuat stok...
               </div>
             ) : stokData.length > 0 ? (
-              <div className="max-h-[70vh] overflow-y-auto font-mono text-sm text-gray-700 whitespace-pre-wrap">
+              <div className="max-h-[70vh] overflow-y-auto font-mono text-sm whitespace-pre-wrap">
                 {stokData.map((item, i) => (
                   <div
                     key={i}
-                    className={`border-b py-1 ${item.sisa_slot === 0
-                      ? "text-red-600"
-                      : "text-green-600"
-                      }`}
+                    className={`border-b py-1 ${
+                      item.sisa_slot > 0 ? "text-green-600" : "text-red-600"
+                    }`}
                   >
                     {`${item.type} | ${item.nama} | ${item.sisa_slot} unit`}
                   </div>
