@@ -1,12 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Page() {
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
+  const [stokPopup, setStokPopup] = useState(false);
+  const [stokData, setStokData] = useState([]);
+  const [loadingStok, setLoadingStok] = useState(false);
 
+  // Fungsi menjalankan multi request
   const handleRun = async () => {
     setError("");
     setResults([]);
@@ -24,7 +28,6 @@ export default function Page() {
     setLoading(true);
     const apiKey = "8BCDC5E5-2741-40E6-AFAF-66390970BEDA";
 
-    // Buat array request dari setiap baris
     const requests = lines.map((line) => {
       const parts = line.split(" ");
       const produk = parts[1];
@@ -61,6 +64,43 @@ export default function Page() {
     setLoading(false);
   };
 
+  // Fungsi ambil stok
+  const handleCekStok = async () => {
+    setLoadingStok(true);
+    setStokPopup(true);
+
+    try {
+      const res = await fetch("https://panel.khfy-store.com/api_v3/cek_stock_akrab");
+      const text = await res.text();
+
+      // Ubah teks menjadi array objek
+      const lines = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((l) => l);
+
+      const parsed = lines.map((line) => {
+        const parts = line.split("|").map((p) => p.trim());
+        return { kode: parts[0], nama: parts[1], stok: parts[2] };
+      });
+
+      setStokData(parsed);
+    } catch {
+      setStokData([]);
+    }
+
+    setLoadingStok(false);
+  };
+
+  // Tutup popup ketika klik di luar modal
+  useEffect(() => {
+    const closePopup = (e) => {
+      if (e.target.id === "stokModal") setStokPopup(false);
+    };
+    window.addEventListener("click", closePopup);
+    return () => window.removeEventListener("click", closePopup);
+  }, []);
+
   return (
     <div className="min-h-screen bg-neutral-100 flex flex-col items-center py-10">
       {/* Header */}
@@ -74,7 +114,7 @@ export default function Page() {
       </div>
 
       {/* Input Card */}
-      <div className="bg-white shadow-lg rounded-2xl w-full max-w-3xl p-6 border border-gray-100">
+      <div className="bg-white shadow-xl rounded-2xl w-full max-w-3xl p-6 border border-gray-100">
         <label className="block text-gray-700 font-medium mb-2">
           Daftar Pembelian
         </label>
@@ -86,7 +126,19 @@ export default function Page() {
           className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <div className="flex justify-end mt-4">
+        {/* Tombol aksi */}
+        <div className="flex justify-end items-center gap-3 mt-4">
+          <button
+            onClick={handleCekStok}
+            disabled={loadingStok}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-white transition ${loadingStok
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+              }`}
+          >
+            {loadingStok ? "Memuat..." : "Cek Stok"}
+          </button>
+
           <button
             onClick={handleRun}
             disabled={loading}
@@ -99,7 +151,7 @@ export default function Page() {
           </button>
         </div>
 
-        {/* Error Message */}
+        {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-300 text-red-700 p-3 rounded-lg mt-4">
             {error}
@@ -120,10 +172,7 @@ export default function Page() {
               </thead>
               <tbody>
                 {results.map((item, i) => (
-                  <tr
-                    key={i}
-                    className="border-b hover:bg-gray-50 transition"
-                  >
+                  <tr key={i} className="border-b hover:bg-gray-50 transition">
                     <td className="px-4 py-2 font-medium">{item.no}</td>
                     <td className="px-4 py-2">{item.produk}</td>
                     <td
@@ -142,7 +191,7 @@ export default function Page() {
           </div>
         )}
 
-        {/* Loading */}
+        {/* Loading Info */}
         {loading && (
           <div className="text-center text-blue-600 font-medium mt-4 animate-pulse">
             Sedang memproses semua pembelian...
@@ -154,6 +203,62 @@ export default function Page() {
       <div className="text-sm text-gray-400 mt-10">
         © {new Date().getFullYear()} | Diistore API Panel
       </div>
+
+      {/* Popup Stok */}
+      {stokPopup && (
+        <div
+          id="stokModal"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"
+        >
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 animate-fadeIn">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h2 className="text-xl font-bold text-gray-800">Stok Produk</h2>
+              <button
+                onClick={() => setStokPopup(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            {loadingStok ? (
+              <div className="text-center text-blue-600 font-medium animate-pulse py-10">
+                Memuat stok...
+              </div>
+            ) : stokData.length > 0 ? (
+              <div className="max-h-[60vh] overflow-y-auto border rounded-lg">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-gray-100 text-gray-700 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-2 border-b">Kode</th>
+                      <th className="px-4 py-2 border-b">Nama Produk</th>
+                      <th className="px-4 py-2 border-b">Stok</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stokData.map((s, i) => (
+                      <tr key={i} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-2 font-medium">{s.kode}</td>
+                        <td className="px-4 py-2">{s.nama}</td>
+                        <td
+                          className={`px-4 py-2 font-semibold ${s.stok.includes("0") ? "text-red-600" : "text-green-600"
+                            }`}
+                        >
+                          {s.stok}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-6">
+                Tidak ada data stok yang tersedia.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
