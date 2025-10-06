@@ -6,6 +6,11 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
+  const [showStock, setShowStock] = useState(false);
+  const [stockData, setStockData] = useState([]);
+  const [loadingStock, setLoadingStock] = useState(false);
+
+  const apiKey = "8BCDC5E5-2741-40E6-AFAF-66390970BEDA";
 
   const handleRun = async () => {
     setError("");
@@ -22,7 +27,6 @@ export default function Page() {
     }
 
     setLoading(true);
-    const apiKey = "8BCDC5E5-2741-40E6-AFAF-66390970BEDA";
 
     const requests = lines.map((line) => {
       const parts = line.split(" ");
@@ -60,6 +64,31 @@ export default function Page() {
     setLoading(false);
   };
 
+  const handleCheckStock = async () => {
+    setShowStock(true);
+    setLoadingStock(true);
+    setStockData([]);
+
+    try {
+      const res = await fetch(
+        `https://panel.khfy-store.com/api_v2/produk?api_key=${apiKey}`
+      );
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setStockData(data);
+      } else if (data?.data) {
+        setStockData(data.data);
+      } else {
+        setStockData([]);
+      }
+    } catch (err) {
+      setStockData([]);
+    }
+
+    setLoadingStock(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center py-10 px-4">
       {/* Header */}
@@ -83,11 +112,17 @@ export default function Page() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder={`Contoh:\nbeli BPAL1 087882724621\nbeli BPAL3 083184857772`}
-          className="w-full border border-gray-300 rounded-xl p-3 text-sm sm:text-base resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className="w-full border border-gray-300 rounded-xl p-3 text-sm sm:text-base resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-500"
         />
 
         {/* Tombol */}
-        <div className="flex justify-end mt-5">
+        <div className="flex flex-wrap justify-end mt-5 gap-3">
+          <button
+            onClick={handleCheckStock}
+            className="px-6 py-2.5 rounded-xl font-semibold text-blue-700 bg-blue-100 hover:bg-blue-200 transition-all duration-300"
+          >
+            {loadingStock ? "Memuat Stok..." : "Cek Stok"}
+          </button>
           <button
             onClick={handleRun}
             disabled={loading}
@@ -137,9 +172,7 @@ export default function Page() {
                     <td className="px-4 py-2">{item.produk}</td>
                     <td
                       className={`px-4 py-2 font-semibold ${
-                        item.data?.status
-                          ? "text-green-600"
-                          : "text-red-600"
+                        item.data?.status ? "text-green-600" : "text-red-600"
                       }`}
                     >
                       {item.data?.status ? "Sukses" : "Gagal"}
@@ -160,6 +193,66 @@ export default function Page() {
         © {new Date().getFullYear()} |{" "}
         <span className="font-semibold text-blue-600">Diistore API Panel</span>
       </div>
+
+      {/* Popup Modal Stok */}
+      {showStock && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 relative overflow-hidden">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Daftar Stok Produk
+            </h2>
+
+            <button
+              onClick={() => setShowStock(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold"
+            >
+              ✕
+            </button>
+
+            {loadingStock ? (
+              <p className="text-center text-blue-600 animate-pulse py-6">
+                Memuat data stok...
+              </p>
+            ) : stockData.length > 0 ? (
+              <div className="overflow-y-auto max-h-[60vh] border border-gray-200 rounded-lg">
+                <table className="w-full text-sm text-gray-700">
+                  <thead className="bg-gray-100 uppercase text-xs text-gray-600">
+                    <tr>
+                      <th className="px-4 py-3 border-b">Kode</th>
+                      <th className="px-4 py-3 border-b">Nama</th>
+                      <th className="px-4 py-3 border-b text-center">Stok</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stockData.map((item, i) => (
+                      <tr
+                        key={i}
+                        className="border-b last:border-none hover:bg-gray-50 transition"
+                      >
+                        <td className="px-4 py-2 font-medium">{item.kode}</td>
+                        <td className="px-4 py-2">{item.nama}</td>
+                        <td
+                          className={`px-4 py-2 text-center font-semibold ${
+                            item.stok > 0
+                              ? "text-green-600"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {item.stok}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-6">
+                Tidak ada data stok tersedia.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
