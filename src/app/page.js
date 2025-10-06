@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Page() {
   const [inputText, setInputText] = useState("");
@@ -7,169 +7,153 @@ export default function Page() {
   const [results, setResults] = useState([]);
   const [error, setError] = useState("");
 
-  // === Untuk Modal Stok ===
-  const [showStockModal, setShowStockModal] = useState(false);
-  const [stockData, setStockData] = useState([]);
-  const [filteredStock, setFilteredStock] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loadingStock, setLoadingStock] = useState(false);
-
   const handleRun = async () => {
     setError("");
     setResults([]);
-    if (!inputText.trim()) return setError("Masukkan minimal satu baris perintah.");
+
+    const lines = inputText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line);
+
+    if (lines.length === 0) {
+      setError("Masukkan minimal satu perintah pembelian!");
+      return;
+    }
 
     setLoading(true);
-    const lines = inputText.split("\n").map(line => line.trim()).filter(Boolean);
+    const apiKey = "8BCDC5E5-2741-40E6-AFAF-66390970BEDA";
 
-    // simulasi eksekusi (ganti dengan logic kamu nanti)
-    const processed = lines.map((line, i) => ({
-      id: i + 1,
-      command: line,
-      status: "Diproses",
-    }));
-    setTimeout(() => {
-      setResults(processed);
-      setLoading(false);
-    }, 1000);
-  };
+    // Buat array request dari setiap baris
+    const requests = lines.map((line) => {
+      const parts = line.split(" ");
+      const produk = parts[1];
+      const no = parts[2];
 
-  const fetchStock = async () => {
-    setLoadingStock(true);
+      if (!produk || !no) {
+        return Promise.resolve({
+          no: "-",
+          produk: "-",
+          data: { status: false, message: `Format salah: "${line}"` },
+        });
+      }
+
+      const reff = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const url = `https://panel.khfy-store.com/api_v2/trx?produk=${produk}&tujuan=${no}&reff_id=${reff}&api_key=${apiKey}`;
+
+      return fetch(url)
+        .then((res) => res.json())
+        .then((data) => ({ no, produk, data }))
+        .catch((err) => ({
+          no,
+          produk,
+          data: { status: false, message: err.message },
+        }));
+    });
+
     try {
-      const res = await fetch("https://panel.khfy-store.com/api_v3/cek_stock_akrab");
-      const text = await res.text();
-      // data dari API berbentuk teks, bukan JSON
-      const lines = text.split("\n").filter(line => line.trim() !== "");
-      const parsed = lines.map((line) => {
-        const parts = line.split("|").map(p => p.trim());
-        return { kode: parts[0], nama: parts[1], stok: parts[2] };
-      });
-      setStockData(parsed);
-      setFilteredStock(parsed);
+      const resultsAll = await Promise.all(requests);
+      setResults(resultsAll);
     } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingStock(false);
+      setError("Terjadi kesalahan saat memproses request.");
     }
-  };
 
-  const handleSearch = (value) => {
-    setSearch(value);
-    const filtered = stockData.filter(
-      (item) =>
-        item.kode.toLowerCase().includes(value.toLowerCase()) ||
-        item.nama.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredStock(filtered);
-  };
-
-  const openStockModal = async () => {
-    setShowStockModal(true);
-    await fetchStock();
-  };
-
-  const closeStockModal = () => {
-    setShowStockModal(false);
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 p-4 flex flex-col items-center">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6">
-        <h1 className="text-2xl font-semibold text-center mb-4">Request Massal Pembelian</h1>
+    <div className="min-h-screen bg-neutral-100 flex flex-col items-center py-10">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Diistore – Multi Request Panel
+        </h1>
+        <p className="text-gray-500 mt-2">
+          Input beberapa perintah pembelian (pisahkan dengan Enter)
+        </p>
+      </div>
 
-        <div className="mb-4">
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            rows="6"
-            placeholder="contoh: beli BPAL1 087812345678&#10;beli BPAL3 081234567890"
-            className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-          {error && <p className="text-red-600 mt-1 text-sm">{error}</p>}
-        </div>
+      {/* Input Card */}
+      <div className="bg-white shadow-lg rounded-2xl w-full max-w-3xl p-6 border border-gray-100">
+        <label className="block text-gray-700 font-medium mb-2">
+          Daftar Pembelian
+        </label>
+        <textarea
+          rows={6}
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder={`Contoh:\nbeli BPAL1 087882724621\nbeli BPAL3 083184857772`}
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
 
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex justify-end mt-4">
           <button
             onClick={handleRun}
             disabled={loading}
-            className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            className={`px-6 py-2.5 rounded-lg font-semibold text-white transition ${loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+              }`}
           >
             {loading ? "Memproses..." : "Mulai Request"}
           </button>
-
-          <button
-            onClick={openStockModal}
-            className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition"
-          >
-            Cek Stok
-          </button>
         </div>
 
-        {/* Hasil */}
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-300 text-red-700 p-3 rounded-lg mt-4">
+            {error}
+          </div>
+        )}
+
+        {/* Results */}
         {results.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold mb-2">Hasil:</h2>
-            <div className="space-y-2">
-              {results.map((r) => (
-                <div key={r.id} className="border rounded-lg p-2 bg-gray-100">
-                  <p className="text-gray-700">{r.command}</p>
-                  <p className="text-sm text-green-700">{r.status}</p>
-                </div>
-              ))}
-            </div>
+          <div className="mt-6 overflow-x-auto border border-gray-200 rounded-lg">
+            <table className="w-full text-sm text-left text-gray-700">
+              <thead className="bg-gray-100 uppercase text-xs text-gray-600">
+                <tr>
+                  <th className="px-4 py-3 border-b">No. HP</th>
+                  <th className="px-4 py-3 border-b">Produk</th>
+                  <th className="px-4 py-3 border-b">Status</th>
+                  <th className="px-4 py-3 border-b">Pesan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((item, i) => (
+                  <tr
+                    key={i}
+                    className="border-b hover:bg-gray-50 transition"
+                  >
+                    <td className="px-4 py-2 font-medium">{item.no}</td>
+                    <td className="px-4 py-2">{item.produk}</td>
+                    <td
+                      className={`px-4 py-2 font-semibold ${item.data?.status ? "text-green-600" : "text-red-600"
+                        }`}
+                    >
+                      {item.data?.status ? "Sukses" : "Gagal"}
+                    </td>
+                    <td className="px-4 py-2 text-gray-600">
+                      {item.data?.message || "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div className="text-center text-blue-600 font-medium mt-4 animate-pulse">
+            Sedang memproses semua pembelian...
           </div>
         )}
       </div>
 
-      {/* === MODAL STOK === */}
-      {showStockModal && (
-        <div
-          onClick={closeStockModal}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()} // biar klik dalam modal gak nutup
-            className="bg-white rounded-2xl shadow-lg w-11/12 max-w-2xl p-5 max-h-[80vh] overflow-y-auto"
-          >
-            <h2 className="text-xl font-semibold mb-4 text-center">📦 Daftar Stok Produk</h2>
-
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Cari produk..."
-              className="w-full mb-3 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500"
-            />
-
-            {loadingStock ? (
-              <p className="text-center text-gray-500">Mengambil data stok...</p>
-            ) : (
-              <div className="space-y-2 text-sm">
-                {filteredStock.map((item, i) => (
-                  <div
-                    key={i}
-                    className="border-b border-gray-200 pb-1 text-gray-800 flex justify-between"
-                  >
-                    <span className="font-mono">{item.kode}</span>
-                    <span className="flex-1 text-center">{item.nama}</span>
-                    <span className="text-right">{item.stok}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={closeStockModal}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Footer */}
+      <div className="text-sm text-gray-400 mt-10">
+        © {new Date().getFullYear()} | Diistore API Panel
+      </div>
     </div>
   );
 }
