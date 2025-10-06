@@ -63,28 +63,25 @@ export default function Page() {
     setLoading(false);
   };
 
-  // ✅ Ambil stok dari API kamu sendiri (via route)
+  // 🔹 Ambil stok cepat via route
   const handleCekStok = async () => {
     setLoadingStok(true);
     setStokPopup(true);
-
     try {
       const res = await fetch("/api/cek_stock");
       const json = await res.json();
-
       if (json.ok && Array.isArray(json.data)) {
         setStokData(json.data);
       } else {
         setStokData([]);
       }
-    } catch (err) {
+    } catch {
       setStokData([]);
     }
-
     setLoadingStok(false);
   };
 
-  // Tutup popup saat klik di luar modal
+  // 🔹 Tutup popup bila klik di luar
   useEffect(() => {
     const closePopup = (e) => {
       if (e.target.id === "stokModal") setStokPopup(false);
@@ -115,7 +112,7 @@ export default function Page() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder={`Contoh:\nbeli BPAL1 087882724621\nbeli BPAL3 083184857772`}
-          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-black"
         />
         <p className="italic text-sm text-[#A0522D] mt-2">
           Contoh format: <span className="font-mono">beli BPAL1 0878xxxxxxx</span>
@@ -126,10 +123,11 @@ export default function Page() {
           <button
             onClick={handleCekStok}
             disabled={loadingStok}
-            className={`px-5 py-2.5 rounded-lg font-semibold text-white transition ${loadingStok
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
-              }`}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-white transition ${
+              loadingStok
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
           >
             {loadingStok ? "Memuat..." : "Cek Stok"}
           </button>
@@ -137,10 +135,11 @@ export default function Page() {
           <button
             onClick={handleRun}
             disabled={loading}
-            className={`px-6 py-2.5 rounded-lg font-semibold text-white transition ${loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            className={`px-6 py-2.5 rounded-lg font-semibold text-white transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
             {loading ? "Memproses..." : "Mulai Request"}
           </button>
@@ -153,7 +152,7 @@ export default function Page() {
           </div>
         )}
 
-        {/* Results */}
+        {/* Hasil */}
         {results.length > 0 && (
           <div className="mt-6 overflow-x-auto border border-gray-200 rounded-lg">
             <table className="w-full text-sm text-left text-gray-700">
@@ -171,10 +170,9 @@ export default function Page() {
                     <td className="px-4 py-2 font-medium">{item.no}</td>
                     <td className="px-4 py-2">{item.produk}</td>
                     <td
-                      className={`px-4 py-2 font-semibold ${item.data?.status
-                        ? "text-green-600"
-                        : "text-red-600"
-                        }`}
+                      className={`px-4 py-2 font-semibold ${
+                        item.data?.status ? "text-green-600" : "text-red-600"
+                      }`}
                     >
                       {item.data?.status ? "Sukses" : "Gagal"}
                     </td>
@@ -188,7 +186,6 @@ export default function Page() {
           </div>
         )}
 
-        {/* Loading Info */}
         {loading && (
           <div className="text-center text-blue-600 font-medium mt-4 animate-pulse">
             Sedang memproses semua pembelian...
@@ -201,13 +198,13 @@ export default function Page() {
         © {new Date().getFullYear()} | Diistore API Panel
       </div>
 
-      {/* ✅ Popup Stok */}
+      {/* 🔹 Popup Stok */}
       {stokPopup && (
         <div
           id="stokModal"
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"
         >
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 animate-fadeIn">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 relative">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
               <h2 className="text-xl font-bold text-gray-800">Stok Produk</h2>
               <button
@@ -227,10 +224,9 @@ export default function Page() {
                 {stokData.map((item, i) => (
                   <div
                     key={i}
-                    className={`border-b py-1 ${item.sisa_slot === 0
-                      ? "text-red-600"
-                      : "text-green-600"
-                      }`}
+                    className={`border-b py-1 ${
+                      item.sisa_slot === 0 ? "text-red-600" : "text-green-600"
+                    }`}
                   >
                     {`${item.type} | ${item.nama} | ${item.sisa_slot} unit`}
                   </div>
