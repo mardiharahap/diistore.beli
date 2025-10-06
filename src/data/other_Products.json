@@ -1,0 +1,156 @@
+[
+    {
+        "nama_produk": "Masa Aktif 1 Bulan",
+        "kode_produk": "MA1B",
+        "kode_provider": "XL",
+        "deskripsi": "- Langsung mendapatkan masaaktif 1 bulan\n- Tidak bisa di tumpuk",
+        "harga_final": 4500
+    },
+    {
+        "nama_produk": "Masa Aktif 1 Tahun",
+        "kode_produk": "MA1T",
+        "kode_provider": "XL",
+        "deskripsi": "-di usahakan nomor tidak dalam masa tenggang\n- jika sudah terlanjur masa tenggang belikan paket edukasi 2gb 1 hari = 1k, setelah beli bisa di coba beli masaaktif 1 tahun lagi\n- tidak langsung menambah masaaktif, stiap bulan dapat masaaktif 1 bulan sampe 1 tahun",
+        "harga_final": 15000
+    },
+    {
+        "nama_produk": "Panel Pterodactyl 1 Bulan",
+        "kode_produk": "PTERO1B",
+        "kode_provider": "DIISTORE",
+        "deskripsi": "- Akses Panel Pterodactyl 1 Bulan",
+        "harga_final": 5000
+    },
+    {
+        "nama_produk": "SC Bot",
+        "kode_produk": "SC_BOT",
+        "kode_provider": "DIISTORE",
+        "deskripsi": "- Script Bot (SC Bot)\n- Keterangan request bot dan harga bisa ditanyakan langsung ke admin",
+        "harga_final": 0
+    },
+    {
+        "nama_produk": "Edukasi 15GB 7h",
+        "kode_produk": "EDU15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket internet edukasi 15GB\n- expired 7 Hari\n- Siapkan saldo ewalet/pulsa Rp: 7.500",
+        "harga_final": 4980
+    },
+    {
+        "nama_produk": "Edukasi 5GB 3h",
+        "kode_produk": "EDU5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket internet edukasi 5GB\n- expired 3 Hari\n- Siapkan saldo ewalet/pulsa Rp: 2.500",
+        "harga_final": 2980
+    },
+    {
+        "nama_produk": "Edukasi 2GB 1h",
+        "kode_produk": "EDU2",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket internet edukasi 2GB\n- expired 1 Hari\n- Siapkan saldo ewalet/pulsa Rp: 1.000",
+        "harga_final": 989
+    },
+    {
+        "nama_produk": "Addon XCP Tiktok 5GB",
+        "kode_produk": "XCP_TIK5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Tiktok 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 2.500\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP YouTube 5GB",
+        "kode_produk": "XCP_YT5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket YouTube 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 2.500\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP Facebook 5GB",
+        "kode_produk": "XCP_FB5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Facebook 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 2.500\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP Instagram 5GB",
+        "kode_produk": "XCP_IG5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Instagram 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 2.500\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP Whatsapp 5GB",
+        "kode_produk": "XCP_WA5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Whatsapp 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 2.500\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP Streaming 5GB",
+        "kode_produk": "XCP_STR5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Streaming 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 3.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP Social Media 5GB",
+        "kode_produk": "XCP_SM5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Social Media 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 3.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP Game 5GB",
+        "kode_produk": "XCP_GAME5",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Game 5GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 3.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 1500
+    },
+    {
+        "nama_produk": "Addon XCP Tiktok 15GB",
+        "kode_produk": "XCP_TIK15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Tiktok 15GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 5.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 3000
+    },
+    {
+        "nama_produk": "Addon XCP YouTube 15GB",
+        "kode_produk": "XCP_YT15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket YouTube 15GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 5.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 3000
+    },
+    {
+        "nama_produk": "Addon XCP Facebook 15GB",
+        "kode_produk": "XCP_FB15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Facebook 15GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 5.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 3000
+    },
+    {
+        "nama_produk": "Addon XCP Instagram 15GB",
+        "kode_produk": "XCP_IG15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Instagram 15GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 5.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 3000
+    },
+    {
+        "nama_produk": "Addon XCP WhatsApp 15GB",
+        "kode_produk": "XCP_WA15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Whatsapp 15GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 5.000\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 3000
+    },
+    {
+        "nama_produk": "Addon XCP Social Media 15GB",
+        "kode_produk": "XCP_SM15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Social Media 15GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 7.500\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 3000
+    },
+    {
+        "nama_produk": "Addon XCP Game 15GB",
+        "kode_produk": "XCP_GAME15",
+        "kode_provider": "XL",
+        "deskripsi": "- Paket Game 15GB\n- Expired mengikuti masaaktif XCP/XCV\n- Siapkan saldo ewalet/pulsa Rp: 7.500\nNomor harus sudah ada paket XCP/XCV",
+        "harga_final": 3000
+    }
+]
