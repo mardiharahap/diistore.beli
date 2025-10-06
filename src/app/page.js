@@ -10,7 +10,6 @@ export default function Page() {
   const [stokData, setStokData] = useState([]);
   const [loadingStok, setLoadingStok] = useState(false);
 
-  // Fungsi menjalankan multi request
   const handleRun = async () => {
     setError("");
     setResults([]);
@@ -64,35 +63,27 @@ export default function Page() {
     setLoading(false);
   };
 
-  // Fungsi ambil stok
+  // ✅ Ambil stok dari API JSON
   const handleCekStok = async () => {
     setLoadingStok(true);
     setStokPopup(true);
 
     try {
       const res = await fetch("https://panel.khfy-store.com/api_v3/cek_stock_akrab");
-      const text = await res.text();
-
-      // Ubah teks menjadi array objek
-      const lines = text
-        .split("\n")
-        .map((line) => line.trim())
-        .filter((l) => l);
-
-      const parsed = lines.map((line) => {
-        const parts = line.split("|").map((p) => p.trim());
-        return { kode: parts[0], nama: parts[1], stok: parts[2] };
-      });
-
-      setStokData(parsed);
-    } catch {
+      const json = await res.json();
+      if (json.ok && Array.isArray(json.data)) {
+        setStokData(json.data);
+      } else {
+        setStokData([]);
+      }
+    } catch (err) {
       setStokData([]);
     }
 
     setLoadingStok(false);
   };
 
-  // Tutup popup ketika klik di luar modal
+  // Tutup popup saat klik di luar modal
   useEffect(() => {
     const closePopup = (e) => {
       if (e.target.id === "stokModal") setStokPopup(false);
@@ -204,7 +195,7 @@ export default function Page() {
         © {new Date().getFullYear()} | Diistore API Panel
       </div>
 
-      {/* Popup Stok */}
+      {/* ✅ Popup Stok */}
       {stokPopup && (
         <div
           id="stokModal"
@@ -215,7 +206,7 @@ export default function Page() {
               <h2 className="text-xl font-bold text-gray-800">Stok Produk</h2>
               <button
                 onClick={() => setStokPopup(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 text-lg"
               >
                 ✕
               </button>
@@ -226,34 +217,22 @@ export default function Page() {
                 Memuat stok...
               </div>
             ) : stokData.length > 0 ? (
-              <div className="max-h-[60vh] overflow-y-auto border rounded-lg">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-100 text-gray-700 sticky top-0">
-                    <tr>
-                      <th className="px-4 py-2 border-b">Kode</th>
-                      <th className="px-4 py-2 border-b">Nama Produk</th>
-                      <th className="px-4 py-2 border-b">Stok</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stokData.map((s, i) => (
-                      <tr key={i} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-2 font-medium">{s.kode}</td>
-                        <td className="px-4 py-2">{s.nama}</td>
-                        <td
-                          className={`px-4 py-2 font-semibold ${s.stok.includes("0") ? "text-red-600" : "text-green-600"
-                            }`}
-                        >
-                          {s.stok}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="max-h-[70vh] overflow-y-auto font-mono text-sm text-gray-700 whitespace-pre-wrap">
+                {stokData.map((item, i) => (
+                  <div
+                    key={i}
+                    className={`border-b py-1 ${item.sisa_slot === 0
+                      ? "text-red-600"
+                      : "text-green-600"
+                      }`}
+                  >
+                    {`${item.type} | ${item.nama} | ${item.sisa_slot} unit`}
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="text-center text-gray-500 py-6">
-                Tidak ada data stok yang tersedia.
+                Tidak ada data stok.
               </p>
             )}
           </div>
