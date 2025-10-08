@@ -386,7 +386,7 @@ export default function Page() {
       {/* Modal */}
       {showPopup && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 shadow-2xl w-full max-w-lg animate-fadeIn">
+          <div className="bg-white text-gray-800 rounded-2xl p-6 shadow-2xl w-full max-w-lg animate-fadeIn border border-gray-200">
             <h2 className="text-lg font-bold text-gray-800 mb-3">
               Buat / Edit Preorder
             </h2>
@@ -395,40 +395,43 @@ export default function Page() {
               Daftar pembelian (satu per baris)
             </label>
             <textarea
-              rows={6}
-              value={popupDaftar}
-              onChange={(e) => setPopupDaftar(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-3 text-sm text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 mt-2"
-            />
+  rows={6}
+  value={popupDaftar}
+  onChange={(e) => setPopupDaftar(e.target.value)}
+  className="w-full border border-gray-300 rounded-xl p-3 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 mt-2"
+/>
+
 
             <div className="flex gap-2 mt-4">
               <input
-                type="number"
-                min="0"
-                max="23"
-                value={popupJam}
-                onChange={(e) => setPopupJam(e.target.value)}
-                placeholder="Jam"
-                className="w-1/3 border p-2 rounded text-center focus:ring-2 focus:ring-purple-300"
-              />
+  type="number"
+  min="0"
+  max="23"
+  value={popupJam}
+  onChange={(e) => setPopupJam(e.target.value)}
+  placeholder="Jam"
+  className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
+/>
+
               <input
-                type="number"
-                min="0"
-                max="59"
-                value={popupMenit}
-                onChange={(e) => setPopupMenit(e.target.value)}
-                placeholder="Menit"
-                className="w-1/3 border p-2 rounded text-center focus:ring-2 focus:ring-purple-300"
-              />
-              <input
-                type="number"
-                min="0"
-                max="59"
-                value={popupDetik}
-                onChange={(e) => setPopupDetik(e.target.value)}
-                placeholder="Detik"
-                className="w-1/3 border p-2 rounded text-center focus:ring-2 focus:ring-purple-300"
-              />
+  type="number"
+  min="0"
+  max="59"
+  value={popupMenit}
+  onChange={(e) => setPopupMenit(e.target.value)}
+  placeholder="Menit"
+  className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
+/>
+
+<input
+  type="number"
+  min="0"
+  max="59"
+  value={popupDetik}
+  onChange={(e) => setPopupDetik(e.target.value)}
+  placeholder="Detik"
+  className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
+/>
             </div>
 
             <div className="flex justify-end gap-3 mt-5">
