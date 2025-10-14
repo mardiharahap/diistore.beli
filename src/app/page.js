@@ -46,38 +46,59 @@ export default function Page() {
         const parts = line.split(" ").filter(Boolean);
         const produk = parts[1];
         const no = parts[2];
-
-        if (!produk || !no) {
-          return Promise.resolve({
-            no: "-",
-            produk: "-",
-            data: { status: false, message: `Format salah: "${line}"` },
-          });
-        }
-
-        const reff = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const url = `https://panel.khfy-store.com/api_v2/trx?produk=${encodeURIComponent(
-          produk
-        )}&tujuan=${encodeURIComponent(no)}&reff_id=${reff}&api_key=${apiKey}`;
-
-        return fetch(url)
-          .then((res) => res.json())
-          .then((data) => ({ no, produk, data }))
-          .catch((err) => ({
-            no,
-            produk,
-            data: { status: false, message: err.message },
-          }));
+        return { line, produk, no };
       });
 
-      try {
-        const resultsAll = await Promise.all(requests);
-        setResults(resultsAll);
-      } catch {
-        setError("Terjadi kesalahan saat memproses request.");
-      } finally {
-        setLoading(false);
+      const capacityPerSecond = 4; // 4 trx/detik
+      let tokens = capacityPerSecond;
+
+      const refill = setInterval(() => {
+        tokens = capacityPerSecond;
+      }, 1000);
+
+      const resultsTemp = [];
+
+      async function sendRequest(item) {
+        const reff = `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const url = `https://panel.khfy-store.com/api_v2/trx?produk=${encodeURIComponent(
+          item.produk
+        )}&tujuan=${encodeURIComponent(item.no)}&reff_id=${reff}&api_key=${apiKey}`;
+
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+
+          // retry jika kena rate limit
+          if (data.error === "rate_limited" && data.retry_after_ms) {
+            await new Promise((r) => setTimeout(r, data.retry_after_ms + 10));
+            return sendRequest(item);
+          }
+
+          return { no: item.no, produk: item.produk, data };
+        } catch (err) {
+          return {
+            no: item.no,
+            produk: item.produk,
+            data: { status: false, message: err.message },
+          };
+        }
       }
+
+      for (const item of requests) {
+        while (tokens <= 0) await new Promise((r) => setTimeout(r, 10));
+        tokens--;
+
+        // kirim tanpa menunggu batch selesai
+        sendRequest(item).then((res) => {
+          resultsTemp.push(res);
+          setResults([...resultsTemp]); // live update
+        });
+      }
+
+      // tunggu semua selesai
+      while (resultsTemp.length < requests.length) await new Promise((r) => setTimeout(r, 50));
+      clearInterval(refill);
+      setLoading(false);
     },
     [inputText, apiKey]
   );
@@ -261,10 +282,11 @@ export default function Page() {
           <button
             onClick={handleCekStok}
             disabled={loadingStok}
-            className={`px-5 py-2.5 rounded-xl font-semibold text-white transition-all ${loadingStok
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-emerald-600 hover:bg-emerald-700"
-              }`}
+            className={`px-5 py-2.5 rounded-xl font-semibold text-white transition-all ${
+              loadingStok
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700"
+            }`}
           >
             {loadingStok ? "Memuat..." : "Cek Stok"}
           </button>
@@ -279,10 +301,9 @@ export default function Page() {
           <button
             onClick={() => handleRun()}
             disabled={loading}
-            className={`px-6 py-2.5 rounded-xl font-semibold text-white transition-all ${loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            className={`px-6 py-2.5 rounded-xl font-semibold text-white transition-all ${
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
             {loading ? "Memproses..." : "Mulai Request"}
           </button>
@@ -308,8 +329,9 @@ export default function Page() {
               {stokData.map((item, i) => (
                 <div
                   key={i}
-                  className={`border-b py-1 ${item.sisa_slot === 0 ? "text-red-600" : "text-green-600"
-                    }`}
+                  className={`border-b py-1 ${
+                    item.sisa_slot === 0 ? "text-red-600" : "text-green-600"
+                  }`}
                 >
                   {`${item.type} | ${item.nama} | ${item.sisa_slot} unit`}
                 </div>
@@ -336,17 +358,13 @@ export default function Page() {
               </thead>
               <tbody>
                 {results.map((item, i) => (
-                  <tr
-                    key={i}
-                    className="border-b hover:bg-gray-50 transition-all"
-                  >
+                  <tr key={i} className="border-b hover:bg-gray-50 transition-all">
                     <td className="px-4 py-2 font-medium">{item.no}</td>
                     <td className="px-4 py-2">{item.produk}</td>
                     <td
-                      className={`px-4 py-2 font-semibold ${item.data?.status
-                        ? "text-emerald-600"
-                        : "text-red-600"
-                        }`}
+                      className={`px-4 py-2 font-semibold ${
+                        item.data?.status ? "text-emerald-600" : "text-red-600"
+                      }`}
                     >
                       {item.data?.status ? "Sukses" : "Gagal"}
                     </td>
@@ -395,43 +413,40 @@ export default function Page() {
               Daftar pembelian (satu per baris)
             </label>
             <textarea
-  rows={6}
-  value={popupDaftar}
-  onChange={(e) => setPopupDaftar(e.target.value)}
-  className="w-full border border-gray-300 rounded-xl p-3 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 mt-2"
-/>
-
+              rows={6}
+              value={popupDaftar}
+              onChange={(e) => setPopupDaftar(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl p-3 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 mt-2"
+            />
 
             <div className="flex gap-2 mt-4">
               <input
-  type="number"
-  min="0"
-  max="23"
-  value={popupJam}
-  onChange={(e) => setPopupJam(e.target.value)}
-  placeholder="Jam"
-  className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
-/>
-
+                type="number"
+                min="0"
+                max="23"
+                value={popupJam}
+                onChange={(e) => setPopupJam(e.target.value)}
+                placeholder="Jam"
+                className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
+              />
               <input
-  type="number"
-  min="0"
-  max="59"
-  value={popupMenit}
-  onChange={(e) => setPopupMenit(e.target.value)}
-  placeholder="Menit"
-  className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
-/>
-
-<input
-  type="number"
-  min="0"
-  max="59"
-  value={popupDetik}
-  onChange={(e) => setPopupDetik(e.target.value)}
-  placeholder="Detik"
-  className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
-/>
+                type="number"
+                min="0"
+                max="59"
+                value={popupMenit}
+                onChange={(e) => setPopupMenit(e.target.value)}
+                placeholder="Menit"
+                className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
+              />
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={popupDetik}
+                onChange={(e) => setPopupDetik(e.target.value)}
+                placeholder="Detik"
+                className="w-1/3 border p-2 rounded text-center text-gray-800 placeholder:text-gray-500 focus:ring-2 focus:ring-purple-300"
+              />
             </div>
 
             <div className="flex justify-end gap-3 mt-5">
