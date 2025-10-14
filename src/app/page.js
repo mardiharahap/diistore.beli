@@ -366,7 +366,7 @@ export default function Page() {
                         item.data?.status ? "text-emerald-600" : "text-red-600"
                       }`}
                     >
-                      {item.data?.status ? "Sukses" : "Gagal"}
+                      {item.data?.status ? "Sukses" : "Succes"}
                     </td>
                     <td className="px-4 py-2 text-gray-600">
                       {item.data?.message || "-"}
